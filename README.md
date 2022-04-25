@@ -1,70 +1,100 @@
-lsidrivemap
-===========
+lsmap
+=====
+
+This tool is intended to create a physical map of which drive is in which slot.
+
+## Example output
+
+    root@nas:~# lsmap disks
+    ATA DEVICES:
+    ╒══════════╤══════════╕
+    │ /dev/sdi │ /dev/sdh │
+    ├──────────┼──────────┤
+    │ /dev/sdj │ /dev/sdg │
+    ├──────────┼──────────┤
+    │ /dev/sdf │ /dev/sdd │
+    ├──────────┼──────────┤
+    │ /dev/sda │ /dev/sdc │
+    ├──────────┼──────────┤
+    │ /dev/sdb │ /dev/sde │
+    ╘══════════╧══════════╛
+
+    NVME DEVICES:
+    ╒══════════════╕
+    │ /dev/nvme0n1 │
+    ╘══════════════╛
+
+    root@nas:~# lsmap disks disk-id
+    ATA DEVICES:
+    ╒═══════════════════════════════════════════╤══════════════════════════════════════════╕
+    │      ata-ST2000LM007-XXXXXXXXXXXXXXX      │ ata-WDC_XXXXXXXX-XXXXXXXXXXXXXXXXXXXXXXX │
+    ├───────────────────────────────────────────┼──────────────────────────────────────────┤
+    │ ata-ST1000LM024_XXXXXXXXXX_XXXXXXXXXXXXXX │ ata-WDC_XXXXXXXXXXXXXXXX_XXXXXXXXXXXXXXX │
+    ├───────────────────────────────────────────┼──────────────────────────────────────────┤
+    │  ata-HGST_XXXXXXXXXXXXXXX_XXXXXXXXXXXXXX  │ ata-HGST_XXXXXXXXXXXXXXX_XXXXXXXXXXXXXX  │
+    ├───────────────────────────────────────────┼──────────────────────────────────────────┤
+    │  ata-HGST_XXXXXXXXXXXXXXX_XXXXXXXXXXXXXX  │ ata-HGST_XXXXXXXXXXXXXXX_XXXXXXXXXXXXXX  │
+    ├───────────────────────────────────────────┼──────────────────────────────────────────┤
+    │  ata-HGST_XXXXXXXXXXXXXXX_XXXXXXXXXXXXXX  │     ata-TOSHIBA_XXXXXXXXXX_XXXXXXXXX     │
+    ╘═══════════════════════════════════════════╧══════════════════════════════════════════╛
+
+    NVME DEVICES:
+    ╒════════════════════════════════════════════════╕
+    │ nvme-SAMSUNG MZVPV256HDGL-XXXXXXXXXXXXXXXXXXXX │
+    ╘════════════════════════════════════════════════╛
+
+    root@nas:~# lsmap disks map-name
+    ATA DEVICES:
+    ╒═════════╤═════════╕
+    │ disk A1 │ disk B1 │
+    ├─────────┼─────────┤
+    │ disk A2 │ disk B2 │
+    ├─────────┼─────────┤
+    │ disk A3 │ disk B3 │
+    ├─────────┼─────────┤
+    │ disk A4 │ disk B4 │
+    ├─────────┼─────────┤
+    │ disk A5 │ disk B5 │
+    ╘═════════╧═════════╛
+
+    NVME DEVICES:
+    ╒═════════╕
+    │ disk A1 │
+    ╘═════════╛
+
+    root@nas:~# lsmap disks port
+    ATA DEVICES:
+    ╒═══╤═══╕
+    │ 8 │ 7 │
+    ├───┼───┤
+    │ 9 │ 6 │
+    ├───┼───┤
+    │ 5 │ 3 │
+    ├───┼───┤
+    │ 0 │ 2 │
+    ├───┼───┤
+    │ 1 │ 4 │
+    ╘═══╧═══╛
+
+    NVME DEVICES:
+    ╒═══╕
+    │ 0 │
+    ╘═══╛
+
+This tool is inspired from [lsidrivemap](https://github.com/louwrentius/lsidrivemap)
 
 
-Owners of a IBM M1015 / LSI 9220-8i controller can use this utility to map
-controller ports to drives. 
+## Configuration
 
-I have a 24 bay disk chassis and use it to create a physical map of which 
-drive is in which slot. 
+The tool can be configured using `lsmap --reconfigure` to make the correspondence
+between logical en physical layout.
 
-![nas][nas]
+## Requirements
+- The script requires Python 3 and python3-tabulate.
 
-[nas]: http://louwrentius.com/static/images/zfsnas01.jpg
+## TODO
+- Support for nvme drives.
+- In the future the tool may also show the temperature of the drive (using `hddtemp` or
+similar tool).
 
-
-The tool can also show the temperature of the drive.
-
-Example output:
-
-    root@nano:~# lsidrivemap temp
-
-    | 37 | 40 | 40 | 37 |
-    | 36 | 36 | 37 | 36 |
-    | 35 | 37 | 36 | 36 |
-    | 35 | 37 | 36 | 35 |
-    | 35 | 36 | 37 | 36 |
-    | 34 | 35 | 36 | 35 |
-
-    root@nano:~# lsidrivemap disk
-
-    | sdr  | sds  | sdt  | sdq  |
-    | sdu  | sdv  | sdx  | sdw  |
-    | sdi  | sdl  | sdaa | sdm  |
-    | sdj  | sdk  | sdn  | sdo  |
-    | sdb  | sdc  | sde  | sdf  |
-    | sda  | sdd  | sdh  | sdg  |
-
-    root@nano:~# lsidrivemap wwn
-
-    | 5000cca23dc53843 | 5000cca23dc52fea | 5000cca23dc31656 | 5000cca23dc01655 |
-    | 5000cca23dc459ee | 5000cca22bf0f4c3 | 5000cca22bef486a | 5000cca23dc51764 |
-    | 5000cca23dc186cf | 5000cca23dc02062 | 5000cca23dda5a33 | 5000cca23dd398fa |
-    | 5000cca23dd56dfb | 5000cca23dd3a8cd | 5000cca23dd9b7df | 5000cca23dda6ae9 |
-    | 5000cca23dd04ded | 5000cca23dd54779 | 5000cca23dd59e65 | 5000cca23dd59b65 |
-    | 5000cca23dd45619 | 5000cca23dd57131 | 5000cca23dd329ba | 5000cca23dd4f9d6 |
-
-The wwn name of a drive is found in /dev/disk/by-id/
-
-Customization
--------------
-
-The output is based on my 24 bay drive chassis that has
-six rows of four drives. You may need to customise the
-'print_controller' function to suit your own needs. 
-
-Known Issues
-------------
-The script reads the WWN serial from the drive and uses
-it to find the drive name in /dev/disk/by-id. If the megacli
-command does not return a WWN, which happens on older WD drives
-for me, no data is returned.
-
-Requirements
-------------
-- The script requires Python 2.7 or higher.
-- LSI command line utility megacli or megacli64 (google for a download)
-- put the /opt/MegaRAID/MegaCli/ directory in your path and either create
-a symbolic link to MegaCli or MegaCli64 with the name of 'megacli' in that folder.
-
-
+Contributions are welcome!

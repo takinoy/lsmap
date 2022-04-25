@@ -1,0 +1,30 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "lsmap"
+authors = [{name = "Cedric Leporcq", email = "cedl38@gmail.com"}]
+readme = "README.md"
+license = {file = "LICENSE"}
+classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
+dynamic = ["version", "description"]
+dependencies = [
+    "click",
+    "lxml",
+    "tabulate",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-runner",
+]
+doc = ["sphinx"]
+
+[project.urls]
+Source = "https://github.com/takinoy/lsmap"
+Bug_Tracker = "https://github.com/takinoy/lsmap/issues"
+
+[project.scripts]
+lsmap = "lsmap.cli:cli"
