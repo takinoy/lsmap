@@ -38,7 +38,6 @@ def get_disk_info_lshw(file=None):
         description = model = serial = path = port = ''
         port = None
         for element in child:
-            # import ipdb; ipdb.set_trace()
             if element.tag == 'description':
                 description = element.text
 
@@ -363,6 +362,34 @@ def save_config(config_file, blockdevices):
         json.dump(blockdevices, outfile)
 
 
+def get_disk_power_state(device):
+    proc = sp.run(
+    ['sudo', 'hdparm', '-C', device['path']], stdout=sp.PIPE
+    )
+    stdout = proc.stdout.decode()
+    # re.split(r'@', re.findall(r'\@[0-9]', element.text)[0])[1]
+    state = re.search(r'active', stdout)
+    if state:
+        return 'active'
+    else:
+        state = re.search(r'standby', stdout)
+        if state:
+            return 'standby'
+        else:
+            state = re.search(r'unknown', stdout)
+            if state:
+                return 'unknown'
+
+    return None
+
+
+def add_power_state(device):
+    state = get_disk_power_state(device)
+    device['state'] = state
+
+    return device
+
+
 def get_drive_temp(devices):
     # TODO
     # https://www.simplified.guide/linux/disk-temperature-view
@@ -431,6 +458,12 @@ def _disks(**kwargs):
                 devices = set_labels(devices, device_type)
         save_config(config_file, blockdevices)
 
+    # get device state
+    for device_type, devices in blockdevices.items():
+        if devices:
+            for device in devices.values():
+                device = add_power_state(device)
+
     data_types = [
         'disk-id',
         'label',
@@ -441,7 +474,9 @@ def _disks(**kwargs):
         'port',
         'path',
         'serial',
+        'state',
     ]
+
     for device_type, devices in blockdevices.items():
         if devices:
             if not attribute:
@@ -451,4 +486,5 @@ def _disks(**kwargs):
                 for data_type in data_types:
                     if attribute == data_type:
                         print_mapping(devices, attribute, device_type)
+
 
