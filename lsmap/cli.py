@@ -123,7 +123,7 @@ def get_disk_info_lsblk(file=None):
         device['map-name'] = None
         device['label'] = None
         device['disk-id'] = (
-            device_type + '-' + device['model']  + '_' + device['serial']
+            device_type + '-' + str(device['model'])  + '_' + str(device['serial'])
         )
 
         blockdevices[device_type][port] = device
@@ -290,8 +290,8 @@ def load_blockdevice_mapping(blockdevices, blockdevices_config):
             port2, _ = get_device_from_attribute(devices, 'serial', serial)
             if port2 is not None:
                 devices[port2]['label'] = label
-            else:
-                devices[port2]['label'] = None
+            # else:
+            #     devices[port2]['label'] = None
 
 
         blockdevices[device_type] = devices
